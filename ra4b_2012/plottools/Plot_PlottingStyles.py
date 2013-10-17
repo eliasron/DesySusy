@@ -10,10 +10,19 @@ def Style_DataHistogram():
     return D
 
 def SignalPalette(signame):
+    defaultColor=46
     if signame.find('lm6')!= -1 or signame.find('LM6')!=-1:
         color=TColor.kMagenta-3
     elif signame.find('lm9')!= -1 or signame.find('LM9')!=-1:
         color=TColor.kYellow-7
+
+    else:
+        print 'the name '+signame+' was not found in the palette, '
+        print 'so I hope you like ',defaultColor
+        
+        color=defaultcolor
+
+        
     return color
 #
         

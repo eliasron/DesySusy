@@ -1,7 +1,6 @@
 
-from ROOT import TH1,TH2,TColor
-
-
+from ROOT import TH1,TH2
+from ROOT import TColor
 
 def GetColor(id):
     """defines a standard color scheme for the mc samples"""

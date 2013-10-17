@@ -1,4 +1,3 @@
-
 from ROOT import gROOT, gDirectory,TCanvas, TF1,TH1F,TH1D,TH1I,TFile,TKey,TString,THStack,TList,TLegend,TPaveText,TIter
 from Plot_RootObjects  import *
 from ToyPlotClass import *

@@ -1,4 +1,5 @@
 from Plot_StackWithRatio import *
+from Plot_SimpleStack import *
 from Plot_RootObjects import *
 from Plot_SetRootObjectsOptions import *
 from ROOT import gROOT,gPad,gDirectory,TCanvas,TLine, TF1,TH1F,TH1D,TH1I,TFile,TKey,TString,THStack,TList,TLegend,TPaveText,TIter,TPad
@@ -40,10 +41,10 @@ class DataBkgSigPlot:
         #self.Plot=StackPlot(self.plotProperties)
         #
         #
-        if len(self.dataDict)==0:
-            raise NameError("dataDict is empty")
-        if len(self.bkgDict)==0:
-            raise NameError("bkgDict is empty")
+        #if len(self.dataDict)==0:
+        #    raise NameError("dataDict is empty")
+        #if len(self.bkgDict)==0:
+        #    raise NameError("bkgDict is empty")
         if len(self.sigDict)==0:
             pass
             #print '**********************************'
@@ -112,6 +113,7 @@ class DataBkgSigPlot:
                 bkgHisto.Scale(weight)
                 #
                 #finally, add it to the stack.
+                
                 self.Plot.AddStack(bkgHisto)
             #
         #
