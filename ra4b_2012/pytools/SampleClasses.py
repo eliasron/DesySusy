@@ -154,8 +154,10 @@ class Sample:
         print '' 
         if NewerFile:
             print '    Mergig IS needed'
+            print 'the file ',file, 'is newer than ',MergedFilePath            
         else:
             print '    Merging is NOT needed'
+            print 'the file ',file, 'is not newer than ',MergedFilePath
         print ''
         return  not NewerFile
     #

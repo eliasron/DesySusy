@@ -29,7 +29,7 @@ class Looper:
         self.blackListHisto=[]
         self.whiteListHisto=[]                
         self.currentPlotInWhiteList=0
-        
+        self.raiseIfNotFound=True
         
     def GetRelativePath(self,HistoPath):
         #remove everything from the ":" onwards
@@ -64,8 +64,11 @@ class Looper:
             raise NameError('histo is not present')
         
         OK=False
+
+        #print 'the pattern to check is ',pattern
         if 'name_exact' in pattern:
-            #print 'testing the histo ',histo.GetName() print 'what is going on ',histo.GetName()==pattern['name_exact']  
+            #print 'testing the histo ',histo.GetName(),
+            #print 'what is going on ',histo.GetName()==pattern['name_exact']  
             OK=OK or histo.GetName()==pattern['name_exact']
             #print 'current OK value is ',OK
         if 'name_not_exact' in pattern:
@@ -92,11 +95,27 @@ class Looper:
     #
 
 
-    def FindHistograms(self,dirName,histo,pattern):
+
+
+
+
+
+    def FindHistograms(self,dirName,histo,pattern={}):
         '''looks for the histogram histo inside of dirName
         it returns self.histoPack if the histograms were found
         otherwise it returns the string NotFound'''
 
+
+        if str(histo).find('ROOT.TH')!= -1:
+            histoName=histo.GetName()
+        else:
+            histoName=histo
+        #
+        #
+        #
+        if len(pattern)==0:
+            pattern= {'name_exact':histoName}
+            
         #print 'dirName = ',dirName
         #print 'lasttfile is ',self.LastTFile
         if dirName=='':
@@ -105,7 +124,10 @@ class Looper:
             dir=self.LastTFile.Get(dirName)
         #
         if str(dir).find('nil')!=-1:
-            raise NameError('the directory '+dirName+' was not found')
+            if self.raiseIfNotFound:
+                raise NameError('the directory '+dirName+' was not found')
+            else:
+                return 'NotFound'
         #
         #print 'and the dirName is ',dirName        
         #print 'the dir is ',dir.GetPath()
@@ -122,17 +144,18 @@ class Looper:
                 if(histofound):
                     #get the rest from the other files
                     #
-                    histoPath=self.GetRelativePath(dir.GetPath())
-                    histoPath=histoPath+'/'+obj.GetName()
+                    relHistoPath=self.GetRelativePath(dir.GetPath())
+                    histoPath=relHistoPath+'/'+obj.GetName()
                     #print 'the histopath is ',histoPath
                     histoPack=self.GetHistoFromFiles(histoPath)
                     #
                     #print 'histograms found, returning ',self.histoPack
+
                     return self.histoPack
             key=nextkey()
 
         print 'in FindHistograms: '
-        print '    the histogram ',histo.GetName(),' was not found in ',dir.GetPath()
+        print '    the histogram ',histoName,' was not found in ',dir.GetPath()
         return 'NotFound'
 
 
@@ -141,7 +164,7 @@ class Looper:
     #
     #
     #
-    def NextHisto(self,pattern):
+    def NextHisto(self,pattern={}):
         """where the magic takes place
         It moves to the next key in the iterator
         if pattern is given, it gets only
@@ -156,11 +179,16 @@ class Looper:
             #the last key has been found
             #jump to the mother directory and
             #resume the loop
-            print 'done with the dir ',dir.GetPath()
+            print 'Directory ',dir.GetPath(), 'was finished '
+            #print dir.GetPath() , ' vs ' ,  self.motherDir
             if not dir.GetPath() in self.motherDir:
-                return 'End'
+                return 'End','nopath'
+
+            print ''
+            print 'Moving to its mother directory: '
+            print '    '+self.motherDir[dir.GetPath()].GetPath()
+            print ''
             
-            print 'moving to the mother directory ',self.motherDir[dir.GetPath()].GetPath()
             self.currentDir=self.motherDir[dir.GetPath()]
             #self.StartLoop(self.currentDir)
             return self.NextHisto(pattern)
@@ -170,6 +198,7 @@ class Looper:
         if obj.IsA().InheritsFrom("TH1"):        
             #get the same object from the other files
 
+            #print 'currently on ',obj.GetName()
             OK=self.ApplyPattern(obj,pattern)
             if not OK:
                 #go to the next one
@@ -177,15 +206,17 @@ class Looper:
             #
             #
             HistoPath=dir.GetPath()
-            HistoPath=self.GetRelativePath(HistoPath)
+            relHistoPath=self.GetRelativePath(HistoPath)
             #
-            HistoPath=HistoPath+'/'+obj.GetName()
+            HistoPath=relHistoPath+'/'+obj.GetName()
             self.GetHistoFromFiles(HistoPath)
             #all the histos are now contained in
             #self.histoPack
 
             #print 'returning ',self.histoPack
-            return self.histoPack
+            #raw_input('yo')
+            return self.histoPack,relHistoPath[1:]
+        
         elif obj.IsA().InheritsFrom("TDirectory"):
             #
             #print 'seeting mother dir ',obj.GetPath(), 'to ', self.currentDir
@@ -211,38 +242,46 @@ class Looper:
                    return self.NextHisto(pattern)
                #
             #
-            
+            #
             self.motherDir[obj.GetPath()]=self.currentDir
             self.StartLoop(obj)
             return self.NextHisto(pattern)
     #
 
-    def NextPlotInList(pattern):
+    def NextPlotInList(self,pattern={}):
         '''gets the next plot from the plotwhitelist and returns it'''
 
-        if self.currentPlotInWhiteList+1 == len(self.whiteListHisto) :
-            return 'End'
+        if self.currentPlotInWhiteList == len(self.whiteListHisto) :
+            #print 'end reached ',self.currentPlotInWhiteList,len(self.whiteListHisto)
+            return 'End','nopath'
 
-        OK=self.ApplyPattern(obj,pattern)
-        if not OK:
-            #go to the next one
-            return self.NextHisto(pattern)
+
         #
         #
+        dir=self.currentDir
+        #print 'the current dir is ',dir.GetPath()
         HistoPath=dir.GetPath()
-        HistoPath=self.GetRelativePath(HistoPath)
+        relHistoPath=self.GetRelativePath(HistoPath)
         #
-        HistoPath=HistoPath+'/'+obj.GetName()
+
+        newHisto=self.whiteListHisto[self.currentPlotInWhiteList]
+        
+        HistoPath=relHistoPath+'/'+newHisto
+
+        #
+        #
         self.GetHistoFromFiles(HistoPath)
         #all the histos are now contained in
         #self.histoPack
         
         #print 'returning ',self.histoPack
-        return self.histoPack
-    
-
+        #print 'nextplotinlist being called'
+        self.currentPlotInWhiteList+=1
+        #
+        return self.histoPack,relHistoPath[1:]
     def Next():
-
+        '''to be defined dynamically'''
+        
         print 'Next is not yet defined '
 
     def StartLoop(self,dir):
@@ -261,20 +300,38 @@ class Looper:
         if indir=='':
             #print 'self.LastTfile is ',self.LastTFile
             dir=self.LastTFile
-            print 'the dir is thus ',dir.GetPath()
+            #print 'the dir is thus ',dir.GetPath()
         else:
             dir=self.LastTFile.Get(indir)
-            
-        self.StartLoop(dir)
 
         #the iterative function
-        self.Next = self.NextHisto
+        self.Next = self.NextHisto        
+        self.StartLoop(dir)
+
 
 
     def LoopOverPlotList(self,startDir,plotList):
         """loops over the loop list"""
-        self.currentDir=startDir
+
+        if startDir=='':
+            #print 'self.LastTfile is ',self.LastTFile
+            dir=self.LastTFile
+            #print 'the dir is thus ',dir.GetPath()
+        else:
+            dir=self.LastTFile.Get(startDir)
+
         self.whiteListHisto=copy.deepcopy(plotList)
         self.Next = self.NextPlotInList
+        self.StartLoop(dir)
+        
 
-           
+    def Start(self,startDir='',plotList=[]):
+        '''starts from either a directory, or a plot list'''
+        if len(plotList)==0:
+            self.StartLoopFromString(startDir)
+        else:
+            self.LoopOverPlotList(startDir,plotList)
+        
+    def getCurrentPlotName(self):
+        return self.whiteListHisto[self.currentPlotInWhiteList-1]
+        

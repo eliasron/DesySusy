@@ -49,22 +49,39 @@ def RetrieveDataMCSignal(inputEgg):
     #=====================================================
 
 
-    if dataEstimation.find('-') !=-1:
-        print 'stripping the - from the data estimation'
-        pos=dataEstimation.find('-')
-        dataEstimation=dataEstimation[:pos]+dataEstimation[pos+1:]
+    #if dataEstimation.find('-') !=-1:
+    #    print 'stripping the - from the data estimation'
+    #    pos=dataEstimation.find('-')
+    #    dataEstimation=dataEstimation[:pos]+dataEstimation[pos+1:]
 
 
-    if mcEstimation.find('-') !=-1:
-        print 'stripping the - from the mc estimation'
-        pos=mcEstimation.find('-')
-        mcEstimation=mcEstimation[:pos]+mcEstimation[pos+1:]
+    #if mcEstimation.find('-') !=-1:
+    #    print 'stripping the - from the mc estimation'
+    #    pos=mcEstimation.find('-')
+    #    mcEstimation=mcEstimation[:pos]+mcEstimation[pos+1:]
 
 
-    if sigEstimation.find('-') !=-1:
-        print 'stripping the - from the signal estimation'
-        pos=sigEstimation.find('-')
-        sigEstimation=sigEstimation[:pos]+sigEstimation[pos+1:]        
+    #if sigEstimation.find('-') !=-1:
+    #    print 'stripping the - from the signal estimation'
+    #    pos=sigEstimation.find('-')
+    #    sigEstimation=sigEstimation[:pos]+sigEstimation[pos+1:]
+
+    #if dataTail.find('-') !=-1:
+    #    print 'stripping the - from the data estimation'
+    #    pos=dataTail.find('-')
+    #    dataTail=dataTail[:pos]+dataTail[pos+1:]
+
+
+    #if mcTail.find('-') !=-1:
+    #    print 'stripping the - from the mc estimation'
+    #    pos=mcTail.find('-')
+    #   mcTail=mcTail[:pos]+mcTail[pos+1:]
+
+
+    #if sigTail.find('-') !=-1:
+    #    print 'stripping the - from the signal estimation'
+    #    pos=sigTail.find('-')
+    #    sigTail=sigTail[:pos]+sigTail[pos+1:]                
     
 
 
@@ -102,8 +119,9 @@ def RetrieveDataMCSignal(inputEgg):
     #
     #
     #GET THE DATA FROM THE SPECIFIED RETRIEVAL FILE
-    DATAstring='samples.'+dataSample+'_'+dataEstimation+'_'+dataTail+'(dataRWOptions)'
-    print DATAstring
+    #DATAstring='samples.'+dataSample+'_'+dataEstimation+'_'+dataTail+'(dataRWOptions)'
+    DATAstring='samples.'+dataSample+'_FromVariables(\''+dataEstimation+'\',\''+dataTail+'\',dataRWOptions)'
+    print 'DATAstring is ',DATAstring
     #raw_input('hi')
     exec('DATA='+DATAstring)
     #
@@ -113,7 +131,9 @@ def RetrieveDataMCSignal(inputEgg):
     order=0
     for mcsample in mcSamples:
         order+=1
-        MCstring='samples.'+mcsample+'_'+mcEstimation+'_'+mcTail+'(mcRWOptions)'
+        #MCstring='samples.'+mcsample+'_'+mcEstimation+'_'+mcTail+'(mcRWOptions)'
+        MCstring='samples.'+mcsample+'_FromVariables(\''+mcEstimation+'\',\''+mcTail+'\',mcRWOptions)'
+        print 'MCString is ',MCstring
         commandst='MCDict[str(order)+\'-\'+mcsample] = ['+MCstring+']'
         #print 'commandst = ',commandst
         exec(commandst)
@@ -124,7 +144,8 @@ def RetrieveDataMCSignal(inputEgg):
     order=0
     for sigsample in sigSamples:
         order+=1
-        SIGstring='samples.'+sigsample+'_'+sigEstimation+'_'+sigTail+'(sigRWOptions)'
+        MCstring='samples.'+sigSample+'_FromVariables(\''+sigEstimation+'\',\''+sigTail+'\',mcRWOptions)'        
+        #SIGstring='samples.'+sigsample+'_'+sigEstimation+'_'+sigTail+'(sigRWOptions)'
         commandst='SIGDict[str(order)+\'-\'+sigsample] = ['+SIGstring+']'
         #print 'commandst = ',commandst
         exec(commandst)
