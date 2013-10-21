@@ -1,0 +1,25 @@
+
+
+
+
+def getSample(sampleSelectionDict,mergeRWOptions):
+    '''select the samples to plot'''
+    dataSample=sampleSelectionDict['Sample']
+    dataEstimation=sampleSelectionDict['Estimation']
+    dataTail=sampleSelectionDict['Tail']
+    dataSampleString='samples.'+dataSample+'_'+dataEstimation+'_'+dataTail+'(mergeRWOptions)'
+    print 'the string is ',dataSampleString
+    datSample=eval(dataSampleString)
+    return datSample
+
+def retrieveSamples(dataValues,dataMergeRWOptions):
+    dataTags=['Sample','Estimation','Tail']
+    dataSelectionDict=dict(zip(dataTags,dataValues))
+    sample=getSample(dataSelectionDict,dataMergeRWOptions)
+    return sample
+    
+
+
+if __name__=='__main__':
+
+    
